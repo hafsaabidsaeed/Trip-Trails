@@ -1,7 +1,7 @@
-// routes/auth.js
+
 const express = require('express');
 const { check } = require('express-validator');
-const { signup, login } = require('../controllers/userController');
+const { signup, login, updateUsers } = require('../controllers/userController');
 
 
 const router = express.Router();
@@ -30,5 +30,13 @@ router.post(
     ],
     login
 );
+
+// @route   PUT api/auth/update/:id
+// @desc    Update user
+// @access  Private
+router.put(
+    '/update/:id',
+     updateUsers
+    );
 
 module.exports = router;
