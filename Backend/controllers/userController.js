@@ -5,6 +5,8 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user');
 require('dotenv').config();
 
+
+// Signup a new user and return a JWT token for authentication
 exports.signup = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -52,6 +54,8 @@ exports.signup = async (req, res) => {
     }
 };
 
+
+// Login a user and return a JWT token for authentication
 exports.login = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -95,6 +99,8 @@ exports.login = async (req, res) => {
 };
 
 
+
+// Update a user's information
 exports.updateUsers = async (req, res) => {
     const { id } = req.params;
     const { name, email, password } = req.body;
@@ -125,6 +131,24 @@ exports.updateUsers = async (req, res) => {
         res.status(400).json({
             success: false,
             message: "Failed to update user",
+            error: err.message
+        });
+    }
+};
+
+// Get all users from the database  
+exports.getUsers = async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.status(200).json({
+            success: true,
+            message: "Users retrieved successfully",
+            data: users
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve users",
             error: err.message
         });
     }
