@@ -2,8 +2,7 @@
 const express = require('express');
 const { check } = require('express-validator');
 const { signup, login, updateUsers } = require('../controllers/userController');
-
-
+const UserSchema = require('../models/user');
 const router = express.Router();
 
 // @route   POST api/auth/signup
@@ -33,10 +32,20 @@ router.post(
 
 // @route   PUT api/auth/update/:id
 // @desc    Update user
-// @access  Private
+// @access  Private 
 router.put(
     '/update/:id',
      updateUsers
     );
+
+
+// @route   GET api/auth/get-users
+// @desc    Get all users
+// @access  Private
+    router.get('/get-users',(req, res) =>{
+        UserSchema.find()
+        .then(users => res.json(users))
+        .catch(err => res.json(err))
+})
 
 module.exports = router;
