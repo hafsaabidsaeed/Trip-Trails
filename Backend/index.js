@@ -3,6 +3,8 @@ const connectToDb = require('./configurations/db');
 require('dotenv').config();
 const app = express();
 const cityRoutes = require('./routes/cityRoutes');
+const tourPackageRoutes = require('./routes/tourPackageRoutes.js');
+
 
 // Connect Database
 connectToDb(); 
@@ -13,6 +15,7 @@ app.use(express.json());
 // Define Routes
 app.use('/api/auth', require('./routes/userRoutes'));
 app.use('/api/cities', cityRoutes);
+app.use('/api/tour-packages', tourPackageRoutes);
 
 const PORT = process.env.PORT || 5010;
 
