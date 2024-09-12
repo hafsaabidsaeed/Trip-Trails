@@ -4,7 +4,10 @@ require('dotenv').config();
 const app = express();
 const cityRoutes = require('./routes/cityRoutes');
 const tourPackageRoutes = require('./routes/tourPackageRoutes.js');
+const cors = require('cors');
 
+// Enable CORS for all routes
+app.use(cors());
 
 // Connect Database
 connectToDb(); 
@@ -17,6 +20,6 @@ app.use('/api/auth', require('./routes/userRoutes'));
 app.use('/api/cities', cityRoutes);
 app.use('/api/tour-packages', tourPackageRoutes);
 
-const PORT = process.env.PORT || 5010;
+const PORT = process.env.PORT || 5009;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

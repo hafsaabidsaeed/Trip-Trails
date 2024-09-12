@@ -4,7 +4,7 @@ const tourPackageSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    duration: { type: String, required: true }, // e.g., 3 days, 5 days
+    duration: { type: String, required: true }, 
     location: { type: String, required: true }, 
     packageType: {
         type: String,
@@ -15,5 +15,3 @@ const tourPackageSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('TourPackage', tourPackageSchema);
-
-
