@@ -25,3 +25,5 @@ router.put('/update-package/:id', updateTourPackage);
 router.delete('/delete-package/:id', deleteTourPackage);
 
 module.exports = router;
+
+

@@ -1,5 +1,5 @@
 const express = require('express');
-const { createCity, getCities, getCityById, updateCity, deleteCity } = require('../controllers/cityController');
+const { createCity, getCities, getCityById, updateCity, deleteCity } = require('../controllers/placesController');
 const upload = require('../configurations/multer'); // Multer for handling image uploads
 
 const router = express.Router();
