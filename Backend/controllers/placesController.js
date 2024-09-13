@@ -1,4 +1,4 @@
-const City = require('../models/cityModel');
+const City = require('../models/placesModel');
 
 // Create a new city
 exports.createCity = async (req, res) => {

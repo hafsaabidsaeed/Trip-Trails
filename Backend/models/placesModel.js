@@ -19,12 +19,10 @@ const citySchema = new mongoose.Schema({
         required: true,
     },
     date: {
-        type: Date, // Store the date, can be used for tracking when the city was added
-        default: Date.now, // Default to current date
+        type: Date, // Date when the city was added
     },
     commentCount: {
-        type: Number, // Count of comments associated with the city
-        default: 0, // Default to 0
+        type: Number, 
     },
     isFeatured: {
         type: Boolean, // Whether the city is featured or not
