@@ -44,7 +44,7 @@ class _SignInPageState extends State<SignInPage> {
 
   // Function to handle login and store session
   Future<void> login(String email, String password) async {
-    final url = 'http://192.168.18.60:5009/api/auth/login'; // Use your machine's IP
+    final url = 'http://192.168.18.60:5009/api/auth/login';
 
     try {
       final response = await http.post(
@@ -102,8 +102,7 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white10, // Set background color to white
-      body: Center(
+      body:  Center(
         child: Container(
           height: 550,
           width: 600,

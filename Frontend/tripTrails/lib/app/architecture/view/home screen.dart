@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // For session mana
 import 'package:triptrails/app/architecture/view/dashboard.dart';
 import 'package:triptrails/app/architecture/view/packages.dart';
 import 'package:triptrails/app/architecture/view/signin.dart'; // SignInPage to redirect after logout
+import 'package:triptrails/app/architecture/view/tour_packages.dart';
 import 'package:triptrails/app/theme/app_colors.dart';
 import 'package:triptrails/app/widgets/cover widget.dart';
 import 'package:triptrails/app/architecture/view/upload package screen.dart';
@@ -21,12 +22,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   final List<String> titles = [
     'Dashboard',
-    'Places',
-    'Upload Packages',
-    'Featured Packages',
-    'Package',
+    'Tour Packages',
+    'Add Packages',
+    'Places'    ,
     'Locations',
-    'Notifications',
+    'Seats',
+    'Booking',
     'Users',
     'Admin',
     'Settings'
@@ -36,10 +37,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     LineIcons.pieChart,
     LineIcons.mapMarker,
     LineIcons.boxOpen,
-    LineIcons.arrowCircleUp,
     LineIcons.rocket,
     LineIcons.mapPin,
-    LineIcons.bell,
+    LineIcons.chair,
+    LineIcons.book,
     LineIcons.users,
     LineIcons.user,
     LineIcons.screwdriver,
@@ -119,7 +120,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 child: TextButton.icon(
                   style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -154,7 +155,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 child: TextButton.icon(
                   style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -248,9 +249,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 },
                 children: <Widget>[
                   DataInfoPage(),
+                  CoverWidget(widget: TourPackagesPage()),
                   CoverWidget(widget: PlacesPage()),
                   CoverWidget(widget: UploadPackageForm()),
-                  const Center(child: Text('Upload Place')),
                   const Center(child: Text('Blogs')),
                   const Center(child: Text('Upload Blog')),
                   const Center(child: Text('States')),
