@@ -6,6 +6,8 @@ const tourPackageSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     duration: { type: String, required: true }, 
     location: { type: String, required: true }, 
+    startDate: { type: String, required: true }, 
+    endDate: { type: String, required: true }, 
     packageType: {
         type: String,
         enum: ['Family', 'Couple', 'Solo'],

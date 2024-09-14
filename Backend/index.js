@@ -6,8 +6,28 @@ const cityRoutes = require('./routes/placesRoutes');
 const tourPackageRoutes = require('./routes/tourPackageRoutes.js');
 const cors = require('cors');
 const path = require('path'); // Import path module
+const upload = require('./configurations/multer'); // Import the multer configuration
 
+app.post('/upload', upload, async (req, res) => {
+    if (!req.file) {
+      return res.status(400).send('No file uploaded');
+    }
+  
+    // Save the image URL in MongoDB
+    const newImage = new ImageModel({
+      url: req.file.path, // Cloudinary image URL
+      public_id: req.file.filename, // Cloudinary public ID
+    });
+  
+    try {
+      await newImage.save();
+      res.status(200).send('Image uploaded to Cloudinary and saved to MongoDB');
+    } catch (error) {
+      res.status(500).send('Error saving image to MongoDB');
+    }
+  });
 
+  
 // Enable CORS for all routes
 app.use(cors());
 
