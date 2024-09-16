@@ -25,7 +25,7 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// Initialize upload
+// Initialize multer with Cloudinary storage and file restrictions
 const upload = multer({
   storage: storage,
   limits: { fileSize: 1024 * 1024 * 5 }, // Limit image size to 5MB
@@ -34,7 +34,7 @@ const upload = multer({
   },
 }).single('image');
 
-// Check file type
+// Check file type (allow only images)
 function checkFileType(file, cb) {
   const filetypes = /jpeg|jpg|png|gif/; // Allowed extensions
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
