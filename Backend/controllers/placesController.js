@@ -5,14 +5,17 @@ exports.createCity = async (req, res) => {
     try {
       const { name, description, location, date, isFeatured } = req.body;
 
-      // Check if image was uploaded
-      let imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+      // Handle uploaded images if any
+      let imagePaths = [];
+      if (req.files && req.files.length > 0) {
+        imagePaths = req.files.map(file => file.path);  // Cloudinary stores full URLs
+      }
 
       const newCity = new City({
         name,
         description,
         location,
-        image: imagePath,           // Save the image path
+        images: imagePaths,           // Save an array of image URLs
         isFeatured: isFeatured || false,  // Set as featured or default to false
         commentCount: 0,            // Default to 0 since no comments initially
         date: date ? new Date(date) : null, // Use provided date or null if not provided
@@ -48,43 +51,47 @@ exports.getCityById = async (req, res) => {
     }
 };
 
-// Update city
+// Update city with optional image uploads
 exports.updateCity = async (req, res) => {
     try {
         const cityId = req.params.id;
         const { name, description, location, date, isFeatured } = req.body;
 
-        // If image is uploaded, update it
-        let imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-
-        const updatedFields = {
-          name,
-          description,
-          location,
-          date: date ? new Date(date) : null, // Update date if provided
-          isFeatured: isFeatured || false,
-        };
-
-        // Only update the image if a new one is provided
-        if (imagePath) {
-          updatedFields.image = imagePath;
+        // Get the current city data from the database
+        const city = await City.findById(cityId);
+        if (!city) {
+            return res.status(404).json({ message: 'City not found' });
         }
 
+        // Handle new uploaded images, if any
+        let imagePaths = city.images; // Keep existing images by default
+        if (req.files && req.files.length > 0) {
+            imagePaths = req.files.map(file => file.path);  // Update with new images if uploaded
+        }
+
+        // Prepare the updated fields
+        const updatedFields = {
+          name: name || city.name,
+          description: description || city.description,
+          location: location || city.location,
+          images: imagePaths, // Keep old images or update with new ones
+          date: date ? new Date(date) : city.date, // Update date if provided, else keep old date
+          isFeatured: isFeatured !== undefined ? isFeatured : city.isFeatured, // Use provided boolean or keep old value
+        };
+
+        // Perform the update
         const updatedCity = await City.findByIdAndUpdate(
             cityId,
             updatedFields,
             { new: true }
         );
 
-        if (!updatedCity) {
-            return res.status(404).json({ message: 'City not found' });
-        }
-
         res.status(200).json(updatedCity);
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
 
 // Delete a city
 exports.deleteCity = async (req, res) => {

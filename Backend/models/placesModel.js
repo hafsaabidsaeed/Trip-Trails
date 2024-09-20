@@ -11,9 +11,9 @@ const citySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    image: {
+    images: [{
         type: String, // This will store the path or URL to the image
-    },
+    }],
     location: {
         type: String, // Store location as a string (e.g., city name or coordinates)
         required: true,
@@ -26,7 +26,7 @@ const citySchema = new mongoose.Schema({
     },
     isFeatured: {
         type: Boolean, // Whether the city is featured or not
-        default: false, // Default to not featured
+        default: false, // Default to not fea tured
     },
 }, {
     timestamps: true // Automatically add createdAt and updatedAt timestamps

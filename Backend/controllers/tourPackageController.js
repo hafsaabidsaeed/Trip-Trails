@@ -3,13 +3,30 @@ const TourPackage = require('../models/tourPackageModel.js');
 // Create a tour package
 exports.createTourPackage = async (req, res) => {
     try {
-        const newPackage = new TourPackage(req.body);
+        const { title, description, price, duration, location, startDate, endDate, packageType } = req.body;
+
+        // If images were uploaded, collect their URLs
+        let imagePaths = req.files ? req.files.map(file => file.path) : [];
+
+        const newPackage = new TourPackage({
+            title,
+            description,
+            price,
+            duration,
+            location,
+            startDate,
+            endDate,
+            packageType,
+            images: imagePaths // Save multiple image URLs
+        });
+
         const savedPackage = await newPackage.save();
         res.status(201).json(savedPackage);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
 };
+
 
 // Get all tour packages
 exports.getTourPackages = async (req, res) => {

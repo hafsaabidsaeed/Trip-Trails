@@ -18,23 +18,22 @@ const storage = new CloudinaryStorage({
     folder: 'trip_trails', // Folder in your Cloudinary account
     format: async (req, file) => {
       const fileExtension = path.extname(file.originalname).toLowerCase();
-      // Automatically set image format based on file extension
-      return fileExtension === '.png' ? 'png' : 'jpg';
+      return fileExtension === '.png' ? 'png' : 'jpg'; // Automatically set image format
     },
     public_id: (req, file) => 'image-' + Date.now(), // Image filename on Cloudinary
   },
 });
 
-// Initialize multer with Cloudinary storage and file restrictions
+// Initialize upload for multiple files
 const upload = multer({
   storage: storage,
   limits: { fileSize: 1024 * 1024 * 5 }, // Limit image size to 5MB
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
-}).single('image');
+}).array('images', 10); // Allow up to 10 images
 
-// Check file type (allow only images)
+// Check file type
 function checkFileType(file, cb) {
   const filetypes = /jpeg|jpg|png|gif/; // Allowed extensions
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
