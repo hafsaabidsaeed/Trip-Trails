@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // For session management
 import 'package:triptrails/app/architecture/view/dashboard.dart';
-import 'package:triptrails/app/architecture/view/packages.dart';
+import 'package:triptrails/app/architecture/view/locations.dart';
 import 'package:triptrails/app/architecture/view/signin.dart'; // SignInPage to redirect after logout
 import 'package:triptrails/app/architecture/view/tour_packages.dart';
+import 'package:triptrails/app/architecture/view/users%20screen.dart';
 import 'package:triptrails/app/theme/app_colors.dart';
 import 'package:triptrails/app/widgets/cover widget.dart';
-import 'package:triptrails/app/architecture/view/upload package screen.dart';
+import 'package:triptrails/app/architecture/view/add package screen.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -24,24 +25,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     'Dashboard',
     'Tour Packages',
     'Add Packages',
-    'Places'    ,
     'Locations',
+    'Users',
     'Seats',
     'Booking',
-    'Users',
     'Admin',
     'Settings'
   ];
 
   final List icons = [
     LineIcons.pieChart,
-    LineIcons.mapMarker,
     LineIcons.boxOpen,
-    LineIcons.rocket,
-    LineIcons.mapPin,
+    LineIcons.plus,
+    LineIcons.mapMarker,
+    LineIcons.users,
     LineIcons.chair,
     LineIcons.book,
-    LineIcons.users,
     LineIcons.user,
     LineIcons.screwdriver,
   ];
@@ -250,13 +249,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 children: <Widget>[
                   DataInfoPage(),
                   CoverWidget(widget: TourPackagesPage()),
+                  CoverWidget(widget: AddPackageScreen()),
                   CoverWidget(widget: PlacesPage()),
-                  CoverWidget(widget: UploadPackageForm()),
+                  CoverWidget(widget: UserListScreen()),
                   const Center(child: Text('Blogs')),
                   const Center(child: Text('Upload Blog')),
-                  const Center(child: Text('States')),
                   const Center(child: Text('Notifications')),
-                  const Center(child: Text('Users')),
                   const Center(child: Text('Admin')),
                   const Center(child: Text('Settings')),
                 ],

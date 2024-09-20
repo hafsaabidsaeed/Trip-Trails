@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'dart:html' as html; // Used for file handling in web
 
 class TourPackagesPage extends StatefulWidget {
   @override
@@ -18,7 +20,6 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
     fetchPackages();
   }
 
-  // Fetch all tour packages from API
   Future<void> fetchPackages() async {
     setState(() {
       isLoading = true;
@@ -58,7 +59,10 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
     TextEditingController(text: package?['duration'] ?? '');
     final locationController =
     TextEditingController(text: package?['location'] ?? '');
+    final startDateController = TextEditingController();
+    final endDateController = TextEditingController();
     String packageType = package?['packageType'] ?? 'Family';
+    List<html.File> images = [];
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -66,78 +70,162 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(package != null ? 'Edit Package' : 'Create Package'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Title'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a title';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(labelText: 'Description'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: priceController,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: durationController,
-                  decoration: const InputDecoration(labelText: 'Duration'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a duration';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: locationController,
-                  decoration: const InputDecoration(labelText: 'Location'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a location';
-                    }
-                    return null;
-                  },
-                ),
-                DropdownButtonFormField<String>(
-                  value: packageType,
-                  items: ['Family', 'Couple', 'Solo'].map((String category) {
-                    return DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      packageType = value!;
-                    });
-                  },
-                  decoration: const InputDecoration(labelText: 'Package Type'),
-                ),
-              ],
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: titleController,
+                    decoration: const InputDecoration(labelText: 'Title'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a title';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: const InputDecoration(labelText: 'Description'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a description';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: priceController,
+                    decoration: const InputDecoration(labelText: 'Price'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a price';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: durationController,
+                    decoration: const InputDecoration(labelText: 'Duration'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a duration';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: locationController,
+                    decoration: const InputDecoration(labelText: 'Location'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a location';
+                      }
+                      return null;
+                    },
+                  ),
+                  // Start Date Field
+                  TextFormField(
+                    controller: startDateController,
+                    decoration: const InputDecoration(
+                      labelText: 'Start Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    readOnly: true,
+                    onTap: () async {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2022),
+                        lastDate: DateTime(2030),
+                      );
+                      if (pickedDate != null) {
+                        startDateController.text =
+                            DateFormat('yyyy-MM-dd').format(pickedDate);
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a start date';
+                      }
+                      return null;
+                    },
+                  ),
+                  // End Date Field
+                  TextFormField(
+                    controller: endDateController,
+                    decoration: const InputDecoration(
+                      labelText: 'End Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    readOnly: true,
+                    onTap: () async {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2022),
+                        lastDate: DateTime(2030),
+                      );
+                      if (pickedDate != null) {
+                        endDateController.text =
+                            DateFormat('yyyy-MM-dd').format(pickedDate);
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select an end date';
+                      }
+                      return null;
+                    },
+                  ),
+                  // Package Type Dropdown
+                  DropdownButtonFormField<String>(
+                    value: packageType,
+                    items: ['Family', 'Couple', 'Solo'].map((String category) {
+                      return DropdownMenuItem(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        packageType = value!;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Package Type'),
+                  ),
+                  // Image Upload Field
+                  ElevatedButton(
+                    onPressed: () {
+                      html.FileUploadInputElement uploadInput =
+                      html.FileUploadInputElement()..accept = 'image/*';
+                      uploadInput.click();
+                      uploadInput.onChange.listen((e) {
+                        final files = uploadInput.files;
+                        if (files!.isNotEmpty) {
+                          setState(() {
+                            images.addAll(files);
+                          });
+                        }
+                      });
+                    },
+                    child: Text('Select Images'),
+                  ),
+                  images.isNotEmpty
+                      ? Wrap(
+                    children: images.map((file) {
+                      return Image.network(html.Url.createObjectUrl(file),
+                          width: 100, height: 100);
+                    }).toList(),
+                  )
+                      : Text('No images selected'),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -153,6 +241,8 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                       durationController.text,
                       locationController.text,
                       packageType,
+                      startDateController.text,
+                      endDateController.text,
                     );
                   } else {
                     createPackage(
@@ -162,6 +252,9 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                       durationController.text,
                       locationController.text,
                       packageType,
+                      startDateController.text,
+                      endDateController.text,
+                      images,
                     );
                   }
                   Navigator.of(context).pop(); // Close dialog
@@ -176,23 +269,43 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
   }
 
   // Function to create a new tour package
-  Future<void> createPackage(String title, String description, double price,
-      String duration, String location, String packageType) async {
-    final response = await http.post(
+  Future<void> createPackage(
+      String title,
+      String description,
+      double price,
+      String duration,
+      String location,
+      String packageType,
+      String startDate,
+      String endDate,
+      List<html.File> images,
+      ) async {
+    var request = http.MultipartRequest(
+      'POST',
       Uri.parse('$apiUrl/add-package'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'title': title,
-        'description': description,
-        'price': price,
-        'duration': duration,
-        'location': location,
-        'packageType': packageType,
-      }),
     );
+    request.fields['title'] = title;
+    request.fields['description'] = description;
+    request.fields['price'] = price.toString();
+    request.fields['duration'] = duration;
+    request.fields['location'] = location;
+    request.fields['packageType'] = packageType;
+    request.fields['startDate'] = startDate;
+    request.fields['endDate'] = endDate;
 
+    for (var image in images) {
+      var reader = html.FileReader();
+      reader.readAsArrayBuffer(image);
+      reader.onLoadEnd.listen((event) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'images',
+          reader.result as List<int>,
+          filename: image.name,
+        ));
+      });
+    }
+
+    var response = await request.send();
     if (response.statusCode == 201) {
       fetchPackages(); // Refresh list after creation
     } else {
@@ -201,8 +314,17 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
   }
 
   // Function to update an existing tour package
-  Future<void> updatePackage(String id, String title, String description,
-      double price, String duration, String location, String packageType) async {
+  Future<void> updatePackage(
+      String id,
+      String title,
+      String description,
+      double price,
+      String duration,
+      String location,
+      String packageType,
+      String startDate,
+      String endDate,
+      ) async {
     final response = await http.put(
       Uri.parse('$apiUrl/update-package/$id'),
       headers: <String, String>{
@@ -215,6 +337,8 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
         'duration': duration,
         'location': location,
         'packageType': packageType,
+        'startDate': startDate,
+        'endDate': endDate,
       }),
     );
 
@@ -228,10 +352,9 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 20.0),
       child: Column(
         children: [
-          // Row with Packages heading and Add Package button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -249,7 +372,6 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
             ],
           ),
           const SizedBox(height: 20),
-          // List of packages
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : Expanded(
@@ -260,7 +382,6 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Card(
-                    elevation: 5,
                     child: ListTile(
                       title: Text(package['title']),
                       subtitle: Column(
@@ -271,6 +392,32 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                           Text('Duration: ${package['duration']}'),
                           Text('Location: ${package['location']}'),
                           Text('Package Type: ${package['packageType']}'),
+                          Text('Start Date: ${package['startDate']}'),
+                          Text('End Date: ${package['endDate']}'),
+                          const SizedBox(height: 10),
+                          package['images'] != null &&
+                              package['images'].isNotEmpty
+                              ? SizedBox(
+                            height: 100,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: package['images'].length,
+                              itemBuilder: (context, imgIndex) {
+                                return Padding(
+                                  padding:
+                                  const EdgeInsets.only(
+                                      right: 8.0),
+                                  child: Image.network(
+                                    package['images'][imgIndex],
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                              : const Text('No images available'),
                         ],
                       ),
                       trailing: Row(
@@ -278,11 +425,13 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit),
-                            onPressed: () => showPackageForm(context, package: package),
+                            onPressed: () =>
+                                showPackageForm(context, package: package),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete),
-                            onPressed: () => deletePackage(package['_id']),
+                            onPressed: () =>
+                                deletePackage(package['_id']),
                           ),
                         ],
                       ),

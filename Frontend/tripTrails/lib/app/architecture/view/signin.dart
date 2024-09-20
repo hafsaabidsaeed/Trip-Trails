@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // For session storage
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:triptrails/app/architecture/view/home%20screen.dart';
 import 'package:triptrails/app/architecture/view/signUp.dart';
 import 'package:triptrails/app/theme/app_colors.dart';
