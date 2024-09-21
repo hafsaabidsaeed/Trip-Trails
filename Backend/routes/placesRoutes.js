@@ -16,6 +16,7 @@ router.get('/get-one-city/:id', getCityById);
 // Update a city (with image upload)
 router.put('/update-city/:id', upload, updateCity);
 
+
 // Delete a city
 router.delete('/delete-city/:id', deleteCity);
 
