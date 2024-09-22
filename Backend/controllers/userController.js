@@ -55,6 +55,7 @@ exports.signup = async (req, res) => {
 };
 
 
+// Login a user and return a JWT token for authentication[m]
 // Login a user and return a JWT token for authentication
 exports.login = async (req, res) => {
     const errors = validationResult(req);
