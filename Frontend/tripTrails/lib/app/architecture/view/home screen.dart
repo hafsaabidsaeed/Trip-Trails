@@ -3,6 +3,7 @@ import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // For session management
 import 'package:triptrails/app/architecture/view/dashboard.dart';
 import 'package:triptrails/app/architecture/view/locations.dart';
+import 'package:triptrails/app/architecture/view/settings.dart';
 import 'package:triptrails/app/architecture/view/signin.dart'; // SignInPage to redirect after logout
 import 'package:triptrails/app/architecture/view/tour_packages.dart';
 import 'package:triptrails/app/architecture/view/users%20screen.dart';
@@ -10,9 +11,10 @@ import 'package:triptrails/app/theme/app_colors.dart';
 import 'package:triptrails/app/widgets/cover widget.dart';
 import 'package:triptrails/app/architecture/view/add package screen.dart';
 
+
+
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -27,10 +29,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     'Add Packages',
     'Locations',
     'Users',
-    'Seats',
-    'Booking',
-    'Admin',
-    'Settings'
+    'Settings',
+    'Admin'
   ];
 
   final List icons = [
@@ -39,10 +39,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     LineIcons.plus,
     LineIcons.mapMarker,
     LineIcons.users,
-    LineIcons.chair,
-    LineIcons.book,
-    LineIcons.user,
     LineIcons.screwdriver,
+    LineIcons.user,
   ];
 
   // Function to handle logout and clear session
@@ -252,10 +250,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   CoverWidget(widget: AddPackageScreen()),
                   CoverWidget(widget: PlacesPage()),
                   CoverWidget(widget: UserListScreen()),
-                  const Center(child: Text('Blogs')),
-                  const Center(child: Text('Upload Blog')),
-                  const Center(child: Text('Notifications')),
-                  const Center(child: Text('Admin')),
+                  CoverWidget(widget: AdminSettingsScreen()),
                   const Center(child: Text('Settings')),
                 ],
               ),

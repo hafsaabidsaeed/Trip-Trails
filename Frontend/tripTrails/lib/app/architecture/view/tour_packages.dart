@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
-import 'dart:html' as html; // Used for file handling in web
+import 'dart:html' as html;
+
+import 'package:triptrails/app/theme/app_colors.dart';
 
 class TourPackagesPage extends StatefulWidget {
   @override
@@ -48,21 +51,19 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
     }
   }
 
-  // Function to show create/edit package form
   void showPackageForm(BuildContext context, {dynamic package}) {
     final titleController = TextEditingController(text: package?['title'] ?? '');
-    final descriptionController =
-    TextEditingController(text: package?['description'] ?? '');
-    final priceController =
-    TextEditingController(text: package?['price']?.toString() ?? '');
-    final durationController =
-    TextEditingController(text: package?['duration'] ?? '');
-    final locationController =
-    TextEditingController(text: package?['location'] ?? '');
-    final startDateController = TextEditingController();
-    final endDateController = TextEditingController();
+    final descriptionController = TextEditingController(text: package?['description'] ?? '');
+    final priceController = TextEditingController(text: package?['price']?.toString() ?? '');
+    final durationController = TextEditingController(text: package?['duration'] ?? '');
+    final locationController = TextEditingController(text: package?['location'] ?? '');
+    final startDateController = TextEditingController(text: package?['startDate'] ?? '');
+    final endDateController = TextEditingController(text: package?['endDate'] ?? '');
     String packageType = package?['packageType'] ?? 'Family';
-    List<html.File> images = [];
+
+    List<html.File> newImages = [];
+    List<String> existingImages = package?['images'] != null ? List<String>.from(package['images']) : [];
+
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -144,15 +145,8 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                         lastDate: DateTime(2030),
                       );
                       if (pickedDate != null) {
-                        startDateController.text =
-                            DateFormat('yyyy-MM-dd').format(pickedDate);
+                        startDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
                       }
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a start date';
-                      }
-                      return null;
                     },
                   ),
                   // End Date Field
@@ -172,15 +166,8 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                         lastDate: DateTime(2030),
                       );
                       if (pickedDate != null) {
-                        endDateController.text =
-                            DateFormat('yyyy-MM-dd').format(pickedDate);
+                        endDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
                       }
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select an end date';
-                      }
-                      return null;
                     },
                   ),
                   // Package Type Dropdown
@@ -199,31 +186,37 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                     },
                     decoration: const InputDecoration(labelText: 'Package Type'),
                   ),
+                  // Display Existing Images
+                  existingImages.isNotEmpty
+                      ? Wrap(
+                    children: existingImages.map((imageUrl) {
+                      return Image.network('http://192.168.18.60:5009' + imageUrl, width: 100, height: 100);
+                    }).toList(),
+                  )
+                      : Text('No images selected'),
                   // Image Upload Field
                   ElevatedButton(
                     onPressed: () {
-                      html.FileUploadInputElement uploadInput =
-                      html.FileUploadInputElement()..accept = 'image/*';
+                      html.FileUploadInputElement uploadInput = html.FileUploadInputElement()..accept = 'image/*';
                       uploadInput.click();
                       uploadInput.onChange.listen((e) {
                         final files = uploadInput.files;
                         if (files!.isNotEmpty) {
                           setState(() {
-                            images.addAll(files);
+                            newImages.addAll(files);
                           });
                         }
                       });
                     },
-                    child: Text('Select Images'),
+                    child: Text('Select New Images'),
                   ),
-                  images.isNotEmpty
+                  newImages.isNotEmpty
                       ? Wrap(
-                    children: images.map((file) {
-                      return Image.network(html.Url.createObjectUrl(file),
-                          width: 100, height: 100);
+                    children: newImages.map((file) {
+                      return Image.network(html.Url.createObjectUrl(file), width: 100, height: 100);
                     }).toList(),
                   )
-                      : Text('No images selected'),
+                      : Text('No new images selected'),
                 ],
               ),
             ),
@@ -243,6 +236,8 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                       packageType,
                       startDateController.text,
                       endDateController.text,
+                      existingImages, // Pass existing images
+                      newImages, // Pass new images
                     );
                   } else {
                     createPackage(
@@ -254,7 +249,7 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                       packageType,
                       startDateController.text,
                       endDateController.text,
-                      images,
+                      newImages, // Pass new images for creation
                     );
                   }
                   Navigator.of(context).pop(); // Close dialog
@@ -268,7 +263,69 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
     );
   }
 
-  // Function to create a new tour package
+
+// Function to update an existing tour package
+  Future<void> updatePackage(
+      String id,
+      String title,
+      String description,
+      double price,
+      String duration,
+      String location,
+      String packageType,
+      String startDate,
+      String endDate,
+      List<String> existingImages,
+      List<html.File> newImages,
+      ) async {
+    var request = http.MultipartRequest(
+      'PUT',
+      Uri.parse('$apiUrl/update-package/$id'),
+    );
+
+    // Adding form fields
+    request.fields['title'] = title;
+    request.fields['description'] = description;
+    request.fields['price'] = price.toString();
+    request.fields['duration'] = duration;
+    request.fields['location'] = location;
+    request.fields['packageType'] = packageType;
+    request.fields['startDate'] = startDate;
+    request.fields['endDate'] = endDate;
+
+    // Add existing images to the request
+    for (var imageUrl in existingImages) {
+      request.fields['existingImages[]'] = imageUrl;
+    }
+
+    // Add new images if they are uploaded
+    for (var image in newImages) {
+      var reader = html.FileReader();
+      reader.readAsArrayBuffer(image);
+
+      await reader.onLoadEnd.first;
+
+      request.files.add(http.MultipartFile.fromBytes(
+        'images',
+        reader.result as List<int>,
+        filename: image.name,
+        contentType: MediaType('image', 'jpeg'),
+      ));
+    }
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      print('Package updated successfully');
+      fetchPackages(); // Refresh the package list
+    } else {
+      print('Failed to update package');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${await response.stream.bytesToString()}');
+    }
+  }
+
+
   Future<void> createPackage(
       String title,
       String description,
@@ -284,6 +341,8 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
       'POST',
       Uri.parse('$apiUrl/add-package'),
     );
+
+    // Adding form fields
     request.fields['title'] = title;
     request.fields['description'] = description;
     request.fields['price'] = price.toString();
@@ -293,59 +352,32 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
     request.fields['startDate'] = startDate;
     request.fields['endDate'] = endDate;
 
+    // Add each image file to the request
     for (var image in images) {
       var reader = html.FileReader();
-      reader.readAsArrayBuffer(image);
-      reader.onLoadEnd.listen((event) {
-        request.files.add(http.MultipartFile.fromBytes(
-          'images',
-          reader.result as List<int>,
-          filename: image.name,
-        ));
-      });
+      reader.readAsArrayBuffer(image); // Read the file as an array buffer
+
+      await reader.onLoadEnd.first; // Wait for the image to fully load
+
+      // Add the image as multipart file
+      request.files.add(http.MultipartFile.fromBytes(
+        'images', // Field name for images
+        reader.result as List<int>, // File data
+        filename: image.name, // File name
+        contentType: MediaType('image', 'jpeg'), // Set content type based on the image type
+      ));
     }
 
+    // Send the request
     var response = await request.send();
+
     if (response.statusCode == 201) {
-      fetchPackages(); // Refresh list after creation
+      print('Package created successfully');
+      fetchPackages(); // Refresh the package list
     } else {
       print('Failed to create package');
-    }
-  }
-
-  // Function to update an existing tour package
-  Future<void> updatePackage(
-      String id,
-      String title,
-      String description,
-      double price,
-      String duration,
-      String location,
-      String packageType,
-      String startDate,
-      String endDate,
-      ) async {
-    final response = await http.put(
-      Uri.parse('$apiUrl/update-package/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'title': title,
-        'description': description,
-        'price': price,
-        'duration': duration,
-        'location': location,
-        'packageType': packageType,
-        'startDate': startDate,
-        'endDate': endDate,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      fetchPackages(); // Refresh list after update
-    } else {
-      print('Failed to update package');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${await response.stream.bytesToString()}');
     }
   }
 
@@ -380,61 +412,92 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
               itemBuilder: (context, index) {
                 final package = packages[index];
                 return Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(0),
                   child: Card(
-                    child: ListTile(
-                      title: Text(package['title']),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Description: ${package['description']}'),
-                          Text('Price: Rs ${package['price']}'),
-                          Text('Duration: ${package['duration']}'),
-                          Text('Location: ${package['location']}'),
-                          Text('Package Type: ${package['packageType']}'),
-                          Text('Start Date: ${package['startDate']}'),
-                          Text('End Date: ${package['endDate']}'),
-                          const SizedBox(height: 10),
-                          package['images'] != null &&
-                              package['images'].isNotEmpty
-                              ? SizedBox(
-                            height: 100,
-                            child: ListView.builder(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0), // No rounded corners
+                    ),
+                    elevation: 2, // Optionally, adjust elevation for a flat look
+                    child: Row(
+                      children: [
+                        // Left half (scrollable images)
+                        Expanded(
+                          flex: 1,
+                          child: SizedBox(
+                            height: 270, // Set the height to match the ListTile content
+                            child: package['images'] != null &&
+                                package['images'].isNotEmpty
+                                ? ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: package['images'].length,
                               itemBuilder: (context, imgIndex) {
                                 return Padding(
-                                  padding:
-                                  const EdgeInsets.only(
-                                      right: 8.0),
+                                  padding: const EdgeInsets.only(right: 8.0),
                                   child: Image.network(
-                                    package['images'][imgIndex],
-                                    width: 100,
-                                    height: 100,
+                                    'http://192.168.18.60:5009' +
+                                        package['images'][imgIndex],
+                                    width: 290, // Ensure consistent width for each image
+                                    height: 150, // Match height of the ListTile
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(Icons.broken_image,
+                                          size: 100);
+                                    },
                                   ),
                                 );
                               },
+                            )
+                                : const Icon(Icons.image_not_supported, size: 100),
+                          ),
+                        ),
+
+                        // Right half (data and buttons)
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                Text(
+                                  package['title'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text('Description: ${package['description']}'),
+                                Text('Price: Rs ${package['price']}'),
+                                Text('Duration: ${package['duration']}'),
+                                Text('Location: ${package['location']}'),
+                                Text('Package Type: ${package['packageType']}'),
+                                Text('Start Date: ${package['startDate']}'),
+                                Text('End Date: ${package['endDate']}'),
+                                const SizedBox(height: 8),
+
+                                // Buttons
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: AppColors.lavender,),
+                                      onPressed: () =>
+                                          showPackageForm(context, package: package),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: AppColors.lavender,),
+                                      onPressed: () =>
+                                          deletePackage(package['_id']),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          )
-                              : const Text('No images available'),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () =>
-                                showPackageForm(context, package: package),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () =>
-                                deletePackage(package['_id']),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );

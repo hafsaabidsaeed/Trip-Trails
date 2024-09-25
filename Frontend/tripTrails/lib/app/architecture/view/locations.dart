@@ -46,12 +46,12 @@ class _PlacesPageState extends State<PlacesPage> {
     String? existingName,
     String? existingDescription,
     String? existingLocation,
-    html.File? existingImageFile,
+    List<String>? existingImages, // Accept the existing images for the city
   }) {
     final nameController = TextEditingController(text: existingName ?? '');
     final descriptionController = TextEditingController(text: existingDescription ?? '');
     final locationController = TextEditingController(text: existingLocation ?? '');
-    html.File? imageFile = existingImageFile;
+    html.File? newImageFile;
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -94,6 +94,38 @@ class _PlacesPageState extends State<PlacesPage> {
                       return null;
                     },
                   ),
+                  const SizedBox(height: 20),
+
+                  // Display existing images if available
+                  if (existingImages != null && existingImages.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Existing Images:'),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          children: existingImages.map((imageUrl) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.network(
+                                imageUrl.startsWith('http')
+                                    ? imageUrl
+                                    : 'http://192.168.18.60:5009$imageUrl',
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.broken_image, size: 50);
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+
+                  const SizedBox(height: 20),
+
                   ElevatedButton(
                     onPressed: () async {
                       html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
@@ -104,36 +136,35 @@ class _PlacesPageState extends State<PlacesPage> {
                         final files = uploadInput.files;
                         if (files!.isNotEmpty) {
                           setState(() {
-                            imageFile = files.first;
+                            newImageFile = files.first;
                           });
                         }
                       });
                     },
-                    child: const Text('Select Image'),
+                    child: const Text('Select New Image'),
                   ),
-                  imageFile != null
-                      ? Image.network(
-                    html.Url.createObjectUrl(imageFile!),
-                    width: 100,
-                    height: 100,
-                  )
-                      : Container(),
+
+                  // Display selected new image preview
+                  if (newImageFile != null)
+                    Image.network(
+                      html.Url.createObjectUrl(newImageFile!),
+                      width: 100,
+                      height: 100,
+                    ),
                 ],
               ),
             ),
           ),
           actions: [
             ElevatedButton(
-              onPressed: isCreating
-                  ? null
-                  : () {
+              onPressed: () {
                 if (formKey.currentState!.validate()) {
                   if (id == null) {
                     createCity(
                       nameController.text,
                       descriptionController.text,
                       locationController.text,
-                      imageFile,
+                      newImageFile,
                     );
                   } else {
                     updateCity(
@@ -141,21 +172,20 @@ class _PlacesPageState extends State<PlacesPage> {
                       nameController.text,
                       descriptionController.text,
                       locationController.text,
-                      imageFile,
+                      newImageFile, // If no new image selected, the existing images will remain
                     );
                   }
                   Navigator.of(context).pop();
                 }
               },
-              child: isCreating
-                  ? const CircularProgressIndicator()
-                  : Text(id == null ? 'Create City' : 'Update City'),
+              child: const Text('Save'),
             ),
           ],
         );
       },
     );
   }
+
 
   Future<void> createCity(
       String name,
@@ -289,7 +319,6 @@ class _PlacesPageState extends State<PlacesPage> {
                   textAlign: TextAlign.start,
                 ),
 
-
                 ElevatedButton(
                   onPressed: () {
                     showCityForm(context: context); // Show form to create a new city
@@ -396,6 +425,7 @@ class _PlacesPageState extends State<PlacesPage> {
                                     existingName: place['name'],
                                     existingDescription: place['description'],
                                     existingLocation: place['location'],
+                                    existingImages: List<String>.from(place['images']), // Pass existing images
                                   ),
                                   color: Colors.blue,
                                 ),
