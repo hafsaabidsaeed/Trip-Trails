@@ -1,4 +1,4 @@
-
+// models/user.js
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
@@ -13,6 +13,12 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
+        required: true,
+    },
+    role: {
+        type: String,
+        enum: ['admin', 'user', 'staff'],
+        default: 'user',
         required: true,
     },
     date: {
