@@ -5,6 +5,8 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user');
 require('dotenv').config();
 
+
+// Create a new user            
 exports.signup = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

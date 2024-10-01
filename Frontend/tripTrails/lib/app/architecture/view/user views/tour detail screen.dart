@@ -1,31 +1,24 @@
-import 'dart:convert';
 import 'package:beamer/beamer.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:triptrails/app/architecture/view/user%20views/tour%20packages.dart';
+
 import '../../../theme/app_colors.dart';
-import '../../../widgets/filter.dart';
 import '../login signup/signUp.dart';
 import '../login signup/signin.dart';
-import 'destinations.dart';
-import 'footer.dart';
-import 'package:http/http.dart' as http;
-import 'aboutUs screen.dart';
 
-class UserHomeScreen extends StatefulWidget {
-  const UserHomeScreen({super.key});
+class TourDetailScreen extends StatefulWidget {
+  final Map<String, dynamic> package;
+
+  const TourDetailScreen({Key? key, required this.package}) : super(key: key);
 
   @override
-  State<UserHomeScreen> createState() => _UserHomeScreenState();
+  State<TourDetailScreen> createState() => _TourDetailScreenState();
 }
 
-class _UserHomeScreenState extends State<UserHomeScreen> {
-
-
+class _TourDetailScreenState extends State<TourDetailScreen> {
   final ScrollController _scrollController = ScrollController();
+  final String baseUrl = "http://192.168.18.60:5009"; // Base URL for local images
 
   // Create GlobalKeys for each section
   final GlobalKey _homeKey = GlobalKey();
@@ -87,47 +80,15 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
 
-
-  List<dynamic> tourPackages = []; // Store the API data
-  bool isLoading = true; // Track loading state
-  bool hasError = false; // Track error state
-
-  final String baseUrl =
-      "http://192.168.18.60:5009"; // Base URL for relative images
-
-  @override
-  void initState() {
-    super.initState();
-    fetchTourPackages(); // Fetch data when the widget is initialized
-  }
-
-  Future<void> fetchTourPackages() async {
-    const apiUrl = 'http://192.168.18.60:5009/api/cities/get-cities'; // API URL
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          tourPackages = data; // Store the API data
-          isLoading = false; // Set loading to false after data is fetched
-        });
-      } else {
-        setState(() {
-          hasError = true;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        hasError = true;
-        isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Get the first image
+    String imageUrl = widget.package['images'][0];
+
+    // Check if the image is local or from Cloudinary
+    if (!imageUrl.startsWith('http')) {
+      imageUrl = '$baseUrl$imageUrl';
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(125),
@@ -250,10 +211,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       ),
                       const SizedBox(width: 20),
                       TextButton(
-                          onPressed: () {
-                            Beamer.of(context).beamToNamed('/destinations');
-                            scrollToSection(_destinationsKey);
-                          },
+                        onPressed: () {
+                          Beamer.of(context).beamToNamed('/destinations');
+                          scrollToSection(_destinationsKey);
+                        },
                         child: const Text(
                           'Destinations',
                           style: TextStyle(fontSize: 16, color: Colors.black),
@@ -325,145 +286,219 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ],
         ),
       ),
-      // Make the body scrollable and maintain central image
-      body: isLoading
-          ? const Center(
-              child:
-                  CircularProgressIndicator()) // Show loader while fetching data
-          : hasError
-              ? const Center(
-                  child: Text('Failed to load data')) // Error message
-              : SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Column(
-                    children: [
-                      Container(
-                        height:
-                            2400, // Fixed height for the entire scrollable content
-                        color: Colors.white,
-                        child: Stack(
-                          children: [
-                            // Background image in the body with fixed height of 650
-                            Container(
-                              key: _homeKey,
-                              child: Image.asset(
-                                'assets/background1.jpg',
-                                height: 650,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Section
+            Image.network(
+              imageUrl,
+              height: 600,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.broken_image,
+                  size: 120,
+                  color: Colors.grey,
+                );
+              },
+            ),
 
-                            Align(
-                              alignment: Alignment.topCenter,
-                              child: Column(
+            // Package Name
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  const BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 80.0, vertical: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                        widget.package['title'],
+                        style: GoogleFonts.lato(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    Row(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_outlined, color: AppColors.lavender, size: 40,),
+                              SizedBox(width: 8,),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const SizedBox(height: 200),
-                                  Image.asset(
-                                    'assets/travel.png',
-                                    height: 100,
-                                    width: 800,
-                                  ),
-                                  const SizedBox(height: 10),
                                   Text(
-                                    'Your journey begins here',
-                                    style: GoogleFonts.lato(
-                                      fontSize: 30,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
+                                    'Location',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    widget.package['location'],
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-
-                            Positioned(
-                              top:
-                                  600, // Adjust this value to move the search bar as needed
-                              left: 100,
-                              right: 100,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 24),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 45, vertical: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      const BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Filter()
-                                ),
-                              ),
-                            ),
-                            // Positioned text "Go Exotic Places" at the bottom
-                            Positioned(
-                              top:
-                                  750, // Adjust this value to move the search bar as needed
-                              left: 100,
-                              right: 100,
-                              child: Center(
-                                child: Container(
-                                  key: _destinationsKey,
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        "Exotic Places",
-                                        style: GoogleFonts.lato(
-                                          fontSize: 36,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-
-                                      const SizedBox(height: 10),
-
-                                      const Text(
-                                        "Destination lists",
-                                        style: TextStyle(
-                                          color: AppColors.lavender,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-
-                                      const SizedBox(height: 20),
-
-                                      // Destination List Grid
-                                      Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20.0),
-                                          child: Destinations()),
-
-                                      const SizedBox(height: 70),
-
-                                      //packages
-                                      Container(
-                                        key: _packagesKey,
-                                        child: DisplayTourPackages(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ],
                       ),
 
-                      // Add the DiscountSection here
-                      Container(key: _newsKey, child: DiscountSection()),
-                      // After all content, add the Footer
-                      Container(key: _contactKey, child: const Footer()),
-                    ],
-                  ),
+                    Row(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.people_outline, color: AppColors.lavender, size: 45,),
+                              SizedBox(width: 8,),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Package Type',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    widget.package['packageType'],
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                    Row(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.access_time_outlined, color: AppColors.lavender, size: 40,),
+                              SizedBox(width: 8,),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Duration',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    widget.package['duration'],
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ), Row(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.category_outlined, color: AppColors.lavender, size: 40,),
+                              SizedBox(width: 5,),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Min Age',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    '12 +',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                  ],
                 ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Rating
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.star,
+                    color: Colors.orange,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '8.0 Superb',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Description
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                widget.package['description'] ?? 'No description available.',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+
+            const SizedBox(height: 300),
+          ],
+        ),
+      ),
     );
   }
 }
+
