@@ -1,49 +1,44 @@
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('cloudinary').v2;
 const path = require('path');
+const fs = require('fs');
 
-// Configure Cloudinary with your credentials
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
+// Create an 'uploads' directory if it doesn't exist
+const uploadDirectory = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDirectory)) {
+    fs.mkdirSync(uploadDirectory);
+}
 
-// Set Cloudinary storage engine for multer
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'trip_trails', // Folder in your Cloudinary account
-    format: async (req, file) => {
-      const fileExtension = path.extname(file.originalname).toLowerCase();
-      return fileExtension === '.png' ? 'png' : 'jpg'; // Automatically set image format
+// Configure multer for local storage
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDirectory); // Store files in 'uploads' directory
     },
-    public_id: (req, file) => 'image-' + Date.now(), // Image filename on Cloudinary
-  },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
 });
 
-// Initialize upload for multiple files
+// Initialize multer for file uploads
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // Limit image size to 5MB
-  fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
-  },
-}).array('images', 10); // Allow up to 10 images
+    storage: storage,
+    limits: { fileSize: 1024 * 1024 * 5 }, // 5MB file size limit
+    fileFilter: (req, file, cb) => {
+        checkFileType(file, cb);
+    }
+}).array('images', 10); // Support multiple image uploads
 
-// Check file type
+// Check file type (allow only image formats)
 function checkFileType(file, cb) {
-  const filetypes = /jpeg|jpg|png|gif/; // Allowed extensions
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
+    const filetypes = /jpeg|jpg|png|gif/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
 
-  if (mimetype && extname) {
-    return cb(null, true);
-  } else {
-    cb('Error: Images Only!');
-  }
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb('Error: Images Only!');
+    }
 }
 
 module.exports = upload;

@@ -8,7 +8,7 @@ exports.createCity = async (req, res) => {
       // Handle uploaded images if any
       let imagePaths = [];
       if (req.files && req.files.length > 0) {
-        imagePaths = req.files.map(file => file.path);  // Cloudinary stores full URLs
+        imagePaths = req.files.map(file => `/uploads/${file.filename}`);  // Use local file paths
       }
 
       const newCity = new City({
@@ -38,18 +38,22 @@ exports.getCities = async (req, res) => {
     }
 };
 
-// Get a single city by ID
+// Get a city with its associated tour packages
 exports.getCityById = async (req, res) => {
     try {
-        const city = await City.findById(req.params.id);
+        // Populate the tourPackages field to get the actual package details
+        const city = await City.findById(req.params.id).populate('tourPackages');
+
         if (!city) {
-            return res.status(404).json({ error: 'City not found' });
+            return res.status(404).json({ message: 'City not found' });
         }
+
         res.status(200).json(city);
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
 
 // Update city with optional image uploads
 exports.updateCity = async (req, res) => {
@@ -66,7 +70,7 @@ exports.updateCity = async (req, res) => {
         // Handle new uploaded images, if any
         let imagePaths = city.images; // Keep existing images by default
         if (req.files && req.files.length > 0) {
-            imagePaths = req.files.map(file => file.path);  // Update with new images if uploaded
+            imagePaths = req.files.map(file => `/uploads/${file.filename}`);  // Replace old images with new ones
         }
 
         // Prepare the updated fields
@@ -74,7 +78,7 @@ exports.updateCity = async (req, res) => {
           name: name || city.name,
           description: description || city.description,
           location: location || city.location,
-          images: imagePaths, // Keep old images or update with new ones
+          images: imagePaths, // Replace old images with new ones if uploaded
           date: date ? new Date(date) : city.date, // Update date if provided, else keep old date
           isFeatured: isFeatured !== undefined ? isFeatured : city.isFeatured, // Use provided boolean or keep old value
         };
@@ -91,7 +95,6 @@ exports.updateCity = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
-
 
 // Delete a city
 exports.deleteCity = async (req, res) => {

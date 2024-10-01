@@ -5,49 +5,90 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user');
 require('dotenv').config();
 
-
-// Signup a new user and return a JWT token for authentication
 exports.signup = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     try {
-        let user = await User.findOne({ email });
+        // Check if a user with the same email and role already exists
+        let existingUser = await User.findOne({ email, name, role });
 
-        if (user) {
-            return res.status(400).json({ msg: 'User already exists' });
+        if (existingUser) {
+            // If all three fields match, prevent account creation
+            return res.status(400).json({ msg: 'User with this email, username, and role already exists' });
         }
 
-        user = new User({
-            name,
-            email,
-            password
-        });
+        // Check if a user with the same email but different role exists
+        existingUser = await User.findOne({ email, name });
+        if (existingUser && existingUser.role !== role) {
+            // Allow account creation if the role is different
+            const newUser = new User({
+                name,
+                email,
+                password,
+                role,
+            });
 
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
+            const salt = await bcrypt.genSalt(10);
+            newUser.password = await bcrypt.hash(password, salt);
 
-        await user.save();
+            await newUser.save();
 
-        const payload = {
-            user: {
-                id: user.id
-            }
-        };
+            const payload = {
+                user: {
+                    id: newUser.id,
+                    role: newUser.role,
+                },
+            };
 
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: 360000 },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token });
-            }
-        );
+
+            jwt.sign(
+                payload,
+                process.env.JWT_SECRET,
+                { expiresIn: 360000 },
+                (err, token) => {
+                    if (err) throw err;
+                    res.json({ token });
+                }
+            );
+        } else {
+            // Proceed if no such user exists
+            const newUser = new User({
+                name,
+                email,
+                password,
+                role,
+            });
+
+
+            const salt = await bcrypt.genSalt(10);
+            newUser.password = await bcrypt.hash(password, salt);
+
+
+            await newUser.save();
+
+
+            const payload = {
+                user: {
+                    id: newUser.id,
+                    role: newUser.role,
+                },
+            };
+
+            jwt.sign(
+                payload,
+                process.env.JWT_SECRET,
+                { expiresIn: 360000 },
+                (err, token) => {
+                    if (err) throw err;
+                    res.json({ token });
+                }
+            );
+        }
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -55,7 +96,7 @@ exports.signup = async (req, res) => {
 };
 
 
-// Login a user and return a JWT token for authentication
+
 exports.login = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -79,8 +120,9 @@ exports.login = async (req, res) => {
 
         const payload = {
             user: {
-                id: user.id
-            }
+                id: user.id,
+                role: user.role,  // Include role in payload
+            },
         };
 
         jwt.sign(
@@ -89,7 +131,19 @@ exports.login = async (req, res) => {
             { expiresIn: 360000 },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token });
+                // Redirect based on role
+                let redirectUrl;
+                switch (user.role) {
+                    case 'admin':
+                        redirectUrl = '/admin';
+                        break;
+                    case 'staff':
+                        redirectUrl = '/dashboard';
+                        break;
+                    default:
+                        redirectUrl = '/user';
+                }
+                res.json({ token, redirectUrl });
             }
         );
     } catch (err) {
@@ -97,7 +151,6 @@ exports.login = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
-
 
 
 // Update a user's information
@@ -122,6 +175,7 @@ exports.updateUsers = async (req, res) => {
             });
         }
 
+        // Return the updated user
         res.status(200).json({
             success: true,
             message: "User updated successfully",
@@ -149,6 +203,34 @@ exports.getUsers = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to retrieve users",
+            error: err.message
+        });
+    }
+};
+
+// Delete a user by ID
+exports.deleteUser = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const user = await User.findByIdAndDelete(id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully",
+            data: user
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete user",
             error: err.message
         });
     }

@@ -1,26 +1,23 @@
-
+// routes/authRoutes.js
 const express = require('express');
 const { check } = require('express-validator');
-const { signup, login, updateUsers } = require('../controllers/userController');
-const UserSchema = require('../models/user');
+const { signup, login, updateUsers, deleteUser } = require('../controllers/userController');
+const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
-// @route   POST api/auth/signup
-// @desc    Register user
-// @access  Public
 router.post(
     '/signup',
     [
         check('name', 'Name is required').not().isEmpty(),
         check('email', 'Please include a valid email').isEmail(),
         check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
+        check('role', 'Role is required').not().isEmpty(),  // Check that role is provided
+        check('role', 'Role must be either admin, user, or staff').isIn(['admin', 'user', 'staff']),  // Validate role value
     ],
     signup
 );
 
-// @route   POST api/auth/login
-// @desc    Authenticate user & get token
-// @access  Public
 router.post(
     '/login',
     [
@@ -30,22 +27,14 @@ router.post(
     login
 );
 
-// @route   PUT api/auth/update/:id
-// @desc    Update user
-// @access  Private 
-router.put(
-    '/update/:id',
-     updateUsers
-    );
+router.put('/update/:id', updateUsers);
 
-
-// @route   GET api/auth/get-users
-// @desc    Get all users
-// @access  Private
-    router.get('/get-users',(req, res) =>{
-        UserSchema.find()
+router.get('/get-users', authenticateToken, authorizeRole('admin'), (req, res) => {
+    UserSchema.find()
         .then(users => res.json(users))
-        .catch(err => res.json(err))
-})
+        .catch(err => res.json(err));
+});
+
+router.delete('/delete/:id', authenticateToken, authorizeRole('admin'), deleteUser);
 
 module.exports = router;
