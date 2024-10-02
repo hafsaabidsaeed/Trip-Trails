@@ -1,5 +1,6 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -35,15 +36,15 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   // Form fields
   String? _name;
   String? _email;
-  String? _selectedDestination;
+  int? _phoneNumber;
   DateTime? _selectedDate;
   String? _selectedTourType;
   String? _selectedTicket;
   int? _numberOfPeople;
 
   // Sample data for dropdowns
-  final List<String> _tourTypes = ['Sightseeing', 'Adventure', 'Cultural'];
-  final List<String> _tickets = ['Standard', 'VIP', 'Family'];
+  final List<String> _tourTypes = ['Family', 'Couple', 'Solo'];
+  final List<String> _tickets = ['Standard', 'luxury', 'Gold'];
   final List<int> _peopleCount =
       List.generate(10, (i) => i + 1); // For people count 1 to 10
 
@@ -70,7 +71,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Booking Submitted: Name: $_name, Email: $_email, '
-              'Destination: $_selectedDestination, Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}, '
+              'Phone: $_phoneNumber, Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}, '
               'Type: $_selectedTourType, Ticket: $_selectedTicket, People: $_numberOfPeople'),
         ),
       );
@@ -666,9 +667,6 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Book Your Trip',
-                                style: TextStyle(
-                                    fontSize: 24, fontWeight: FontWeight.w800)),
                             const SizedBox(height: 15),
 
                             Padding(
@@ -680,9 +678,9 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                   children: [
                                     // Title
                                     Text(
-                                      'Book Tours',
+                                      'Book Your Trip',
                                       style: TextStyle(
-                                        fontSize: 22,
+                                        fontSize: 24,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87,
                                       ),
@@ -740,60 +738,67 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                     ),
                                     SizedBox(height: 20),
 
-                                    // "Where to" field (Text Input)
                                     TextFormField(
                                       decoration: InputDecoration(
-                                        labelText: 'Where to',
+                                        labelText: 'Phone Number',
+                                        prefixText: '+92 ',
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12.0),
                                           borderSide: BorderSide(color: Colors.grey),
                                         ),
-                                        contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 16.0, vertical: 16.0),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                                        LengthLimitingTextInputFormatter(10),   // Limit to 10 digits
+                                      ],
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'Please enter a destination';
+                                          return 'Please enter your phone number';
+                                        }
+                                        if (value.length != 10) {
+                                          return 'Phone number must be 10 digits';
                                         }
                                         return null;
                                       },
                                       onSaved: (value) {
-                                        _selectedDestination = value;
+                                        _phoneNumber = int.tryParse(value!);
                                       },
                                     ),
                                     SizedBox(height: 20),
 
-                                    // "When" field (Date Picker)
-                                    GestureDetector(
-                                      onTap: () => _pickDate(context),
-                                      child: AbsorbPointer(
-                                        child: TextFormField(
-                                          decoration: InputDecoration(
-                                            labelText: 'When',
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(12.0),
-                                              borderSide:
-                                                  BorderSide(color: Colors.grey),
-                                            ),
-                                            contentPadding: EdgeInsets.symmetric(
-                                                horizontal: 16.0, vertical: 16.0),
-                                          ),
-                                          controller: TextEditingController(
-                                            text: _selectedDate == null
-                                                ? ''
-                                                : DateFormat('MM/dd/yyyy')
-                                                    .format(_selectedDate!),
-                                          ),
-                                          validator: (value) {
-                                            if (value == null || value.isEmpty) {
-                                              return 'Please select a date';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 20),
+                                    // // "When" field (Date Picker)
+                                    // GestureDetector(
+                                    //   onTap: () => _pickDate(context),
+                                    //   child: AbsorbPointer(
+                                    //     child: TextFormField(
+                                    //       decoration: InputDecoration(
+                                    //         labelText: 'When',
+                                    //         border: OutlineInputBorder(
+                                    //           borderRadius: BorderRadius.circular(12.0),
+                                    //           borderSide:
+                                    //               BorderSide(color: Colors.grey),
+                                    //         ),
+                                    //         contentPadding: EdgeInsets.symmetric(
+                                    //             horizontal: 16.0, vertical: 16.0),
+                                    //       ),
+                                    //       controller: TextEditingController(
+                                    //         text: _selectedDate == null
+                                    //             ? ''
+                                    //             : DateFormat('MM/dd/yyyy')
+                                    //                 .format(_selectedDate!),
+                                    //       ),
+                                    //       validator: (value) {
+                                    //         if (value == null || value.isEmpty) {
+                                    //           return 'Please select a date';
+                                    //         }
+                                    //         return null;
+                                    //       },
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    // SizedBox(height: 20),
 
                                     // "Type" field (Dropdown)
                                     DropdownButtonFormField<String>(
@@ -904,7 +909,8 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                           ),
                                         ],
                                       ),
-                                      width: screenWidth*0.1,
+                                      width: screenWidth*0.15,
+                                      height: screenHeight*0.07,
                                       child: ElevatedButton(
                                         onPressed: _submitForm,
                                         style: ElevatedButton.styleFrom(
@@ -937,7 +943,9 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                   ],
                 ),
               ),
+              SizedBox(height: screenHeight * 0.3,)
             ],
+
           ),
         ));
   }
