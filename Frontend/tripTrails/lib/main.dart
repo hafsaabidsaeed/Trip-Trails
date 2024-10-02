@@ -1,7 +1,6 @@
 // main.dart
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
-import 'package:triptrails/app/architecture/view/admin%20views/home%20screen.dart';
 import 'package:triptrails/app/architecture/view/user%20views/user%20home%20screen.dart';
 import 'package:triptrails/app/theme/app_colors.dart';
 
@@ -19,17 +18,17 @@ class HomeLocation extends BeamLocation<BeamState> {
   @override
   List<BeamPage> buildPages(BuildContext context, BeamState state) {
     return [
-      BeamPage(
+      const BeamPage(
         key: ValueKey('home'),
         title: 'User Home Screen',
-        child: AdminHomePage(),
+        child: UserHomeScreen(),
       ),
     ];
   }
 }
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

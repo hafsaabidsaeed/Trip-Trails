@@ -3,7 +3,9 @@ const TourPackage = require('../models/tourPackageModel.js');
 // Create a tour package and associate it with a city
 exports.createTourPackage = async (req, res) => {
     try {
-        const { title, description, price, duration, location, startDate, endDate, packageType, cityId } = req.body;
+        const { title, description, price, duration, location, startDate, endDate, packageType
+            // , cityId
+         } = req.body;
 
         // Collect the paths of uploaded images from req.files
         let imagePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
@@ -18,7 +20,7 @@ exports.createTourPackage = async (req, res) => {
             endDate,
             packageType,
             images: imagePaths,
-            city: cityId  // Reference to the city
+            // city: cityId  // Reference to the city
         });
 
         const savedPackage = await newPackage.save();
@@ -76,7 +78,7 @@ exports.getTourPackagesByCity = async (req, res) => {
     }
 };
 
-
+// Controller: Update a tour package
 exports.updateTourPackage = async (req, res) => {
     try {
         const { title, description, price, duration, location, startDate, endDate, packageType } = req.body;
@@ -93,16 +95,16 @@ exports.updateTourPackage = async (req, res) => {
         // Merge existing images with new images if they exist
         let updatedImages = [...tourPackage.images, ...newImagePaths];
 
-        // Update the package with new details and merged image paths
-        tourPackage.title = title;
-        tourPackage.description = description;
-        tourPackage.price = price;
-        tourPackage.duration = duration;
-        tourPackage.location = location;
-        tourPackage.startDate = startDate;
-        tourPackage.endDate = endDate;
-        tourPackage.packageType = packageType;
-        tourPackage.images = updatedImages; // Preserve both old and new images
+        // Update the fields only if they are provided in the request body
+        if (title) tourPackage.title = title;
+        if (description) tourPackage.description = description;
+        if (price) tourPackage.price = price;
+        if (duration) tourPackage.duration = duration;
+        if (location) tourPackage.location = location;
+        if (startDate) tourPackage.startDate = startDate;
+        if (endDate) tourPackage.endDate = endDate;
+        if (packageType) tourPackage.packageType = packageType;
+        tourPackage.images = updatedImages;  // Preserve both old and new images
 
         // Save the updated package
         const updatedPackage = await tourPackage.save();
@@ -111,6 +113,7 @@ exports.updateTourPackage = async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 };
+
 
 // Delete a tour package
 exports.deleteTourPackage = async (req, res) => {

@@ -19,8 +19,8 @@ class _DisplayTourPackagesState extends State<DisplayTourPackages> {
   List<dynamic> tourPackages = []; // Store the API data
   bool isLoading = true; // Track loading state
   bool hasError = false; // Track error state
-  final String baseUrl =
-      "http://192.168.18.60:5009"; // Base URL for relative images
+  final String baseUrl = "http://192.168.18.60:5009"; // Base URL for relative images
+  // final String baseUrl = "http://192.168.100.70:5009"; // Base URL for relative images
 
   @override
   void initState() {
@@ -30,6 +30,7 @@ class _DisplayTourPackagesState extends State<DisplayTourPackages> {
 
   Future<void> fetchTourPackages() async {
     const apiUrl = 'http://192.168.18.60:5009/api/tour-packages/get-packages'; // API URL
+    // const apiUrl = 'http://192.168.100.70:5009/api/tour-packages/get-packages'; // API URL
     try {
       final response = await http.get(Uri.parse(apiUrl));
 

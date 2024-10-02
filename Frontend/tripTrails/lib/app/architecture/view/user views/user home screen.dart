@@ -103,6 +103,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   Future<void> fetchTourPackages() async {
     const apiUrl = 'http://192.168.18.60:5009/api/cities/get-cities'; // API URL
+    // const apiUrl = 'http://192.168.100.70:5009/api/cities/get-cities'; // API URL
     try {
       final response = await http.get(Uri.parse(apiUrl));
 
