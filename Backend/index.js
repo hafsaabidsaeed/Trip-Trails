@@ -9,7 +9,11 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const app = express();
 
 // Enable CORS for all routes
-app.use(cors());
+
+app.use(cors({
+  origin: '*',  // Allow all origins, adjust as needed
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 
 // Init Middleware (Place this before your route definitions)
 app.use(express.json()); // Parses incoming requests with JSON payloads

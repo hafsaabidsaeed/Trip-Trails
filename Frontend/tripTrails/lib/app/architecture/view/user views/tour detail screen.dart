@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
+import 'package:http/http.dart' as http;
 import '../../../theme/app_colors.dart';
 import '../login signup/signUp.dart';
 import '../login signup/signin.dart';
@@ -36,7 +38,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   // Form fields
   String? _name;
   String? _email;
-  int? _phoneNumber;
+  String? _phoneNumber;  // Change from int? to String?
   DateTime? _selectedDate;
   String? _selectedTourType;
   String? _selectedTicket;
@@ -48,33 +50,61 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   final List<int> _peopleCount =
       List.generate(10, (i) => i + 1); // For people count 1 to 10
 
-  // Function to pick a date
-  Future<void> _pickDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
 
-  // Form submission logic
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      // Handle booking logic here (e.g., API call)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Booking Submitted: Name: $_name, Email: $_email, '
-              'Phone: $_phoneNumber, Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}, '
-              'Type: $_selectedTourType, Ticket: $_selectedTicket, People: $_numberOfPeople'),
-        ),
-      );
+
+      // Prepare the data for the API request
+      Map<String, dynamic> bookingData = {
+        'name': _name,
+        'email': _email,
+        'phoneNumber': '+92 $_phoneNumber',  // Send it as a string with the prefix
+        'tourDate': DateFormat('yyyy-MM-dd').format(_selectedDate!),
+        'tourType': _selectedTourType,
+        'ticketType': _selectedTicket,
+        'numberOfPeople': _numberOfPeople,
+        'packageId': widget.package['id'],
+      };
+
+
+      try {
+        // Send the POST request to the backend
+        final response = await http.post(
+          Uri.parse('$baseUrl/api/bookings/add-booking'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(bookingData),
+        );
+
+        // Debugging: Print the response
+        print('Request URL: $baseUrl/api/bookings/add-booking');
+        print('Request Body: ${jsonEncode(bookingData)}');
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          // Clear the form after successful submission
+          _formKey.currentState!.reset();
+
+          // Show a success message using a Snackbar
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Booking successfully submitted!')),
+          );
+        } else {
+          // Handle server error
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to submit booking: ${response.body}')),
+          );
+        }
+      } catch (error) {
+        // Handle any error that occurs during the request
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $error')),
+        );
+        print('Error occurred: $error');
+      }
     }
   }
 
@@ -110,6 +140,20 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
     );
   }
 
+  // Function to pick a date
+  Future<void> _pickDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
   void _showSignUpDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -569,7 +613,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: screenWidth * 0.6 ,
+                      width: screenWidth * 0.5 ,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -583,7 +627,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                             child: Text(
                                 widget.package['description'] ??
                                     'No description available.',
-                                style: const TextStyle(fontSize: 18)),
+                                style: const TextStyle(fontSize: 18, color: Colors.black54), textAlign: TextAlign.justify,),
                           ),
                           const SizedBox(height: 15),
 
@@ -646,6 +690,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       ),
                     ),
 
+                    SizedBox(width: screenWidth*0.13,),
 
                     // Booking Form Section
                     Container(
@@ -763,42 +808,43 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                         return null;
                                       },
                                       onSaved: (value) {
-                                        _phoneNumber = int.tryParse(value!);
+                                        _phoneNumber = value;  // Save it as a String
                                       },
+
                                     ),
                                     SizedBox(height: 20),
 
-                                    // // "When" field (Date Picker)
-                                    // GestureDetector(
-                                    //   onTap: () => _pickDate(context),
-                                    //   child: AbsorbPointer(
-                                    //     child: TextFormField(
-                                    //       decoration: InputDecoration(
-                                    //         labelText: 'When',
-                                    //         border: OutlineInputBorder(
-                                    //           borderRadius: BorderRadius.circular(12.0),
-                                    //           borderSide:
-                                    //               BorderSide(color: Colors.grey),
-                                    //         ),
-                                    //         contentPadding: EdgeInsets.symmetric(
-                                    //             horizontal: 16.0, vertical: 16.0),
-                                    //       ),
-                                    //       controller: TextEditingController(
-                                    //         text: _selectedDate == null
-                                    //             ? ''
-                                    //             : DateFormat('MM/dd/yyyy')
-                                    //                 .format(_selectedDate!),
-                                    //       ),
-                                    //       validator: (value) {
-                                    //         if (value == null || value.isEmpty) {
-                                    //           return 'Please select a date';
-                                    //         }
-                                    //         return null;
-                                    //       },
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    // SizedBox(height: 20),
+                                    // "When" field (Date Picker)
+                                    GestureDetector(
+                                      onTap: () => _pickDate(context),
+                                      child: AbsorbPointer(
+                                        child: TextFormField(
+                                          decoration: InputDecoration(
+                                            labelText: 'When',
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                              borderSide:
+                                                  BorderSide(color: Colors.grey),
+                                            ),
+                                            contentPadding: EdgeInsets.symmetric(
+                                                horizontal: 16.0, vertical: 16.0),
+                                          ),
+                                          controller: TextEditingController(
+                                            text: _selectedDate == null
+                                                ? ''
+                                                : DateFormat('MM/dd/yyyy')
+                                                    .format(_selectedDate!),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Please select a date';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 20),
 
                                     // "Type" field (Dropdown)
                                     DropdownButtonFormField<String>(
@@ -872,7 +918,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                           borderRadius: BorderRadius.circular(12.0),
                                           borderSide: BorderSide(color: Colors.grey),
                                         ),
-                                        contentPadding: EdgeInsets.symmetric(
+                                         contentPadding: EdgeInsets.symmetric(
                                             horizontal: 16.0, vertical: 16.0),
                                       ),
                                       value: _numberOfPeople,
@@ -940,8 +986,13 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       ),
                     ),
 
+
                   ],
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                child: Divider(),
               ),
               SizedBox(height: screenHeight * 0.3,)
             ],

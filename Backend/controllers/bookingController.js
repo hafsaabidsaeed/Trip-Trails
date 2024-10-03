@@ -5,10 +5,10 @@ const Booking = require('../models/bookingModel');
 // @route   POST /api/bookings
 exports.createBooking = async (req, res) => {
   try {
-    const { name, email, phoneNumber, tourType, ticketType, bookingDate, numberOfPeople } = req.body;
+    const { name, email, phoneNumber, tourType, ticketType, tourDate, numberOfPeople } = req.body;
 
     // Basic validation
-    if (!name || !email || !phoneNumber || !tourType || !ticketType || !bookingDate || !numberOfPeople) {
+    if (!name || !email || !phoneNumber || !tourType || !ticketType || !tourDate || !numberOfPeople) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -18,7 +18,7 @@ exports.createBooking = async (req, res) => {
       phoneNumber,
       tourType,
       ticketType,
-      bookingDate,
+      tourDate,
       numberOfPeople,
     });
 
@@ -78,7 +78,7 @@ exports.deleteBooking = async (req, res) => {
 // @route   PUT /api/bookings/:id
 exports.updateBooking = async (req, res) => {
   try {
-    const { name, email, phoneNumber, tourType, ticketType, bookingDate, numberOfPeople } = req.body;
+    const { name, email, phoneNumber, tourType, ticketType, tourDate, numberOfPeople } = req.body;
 
     let booking = await Booking.findById(req.params.id);
     if (!booking) {
@@ -91,7 +91,7 @@ exports.updateBooking = async (req, res) => {
     booking.phoneNumber = phoneNumber || booking.phoneNumber;
     booking.tourType = tourType || booking.tourType;
     booking.ticketType = ticketType || booking.ticketType;
-    booking.bookingDate = bookingDate || booking.bookingDate;
+    booking.tourDate = tourDate || booking.tourDate;
     booking.numberOfPeople = numberOfPeople || booking.numberOfPeople;
 
     await booking.save();

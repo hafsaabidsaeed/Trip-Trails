@@ -9,6 +9,7 @@ import 'package:triptrails/app/theme/app_colors.dart';
 import 'package:triptrails/app/widgets/cover widget.dart';
 import 'package:triptrails/app/architecture/view/admin%20views/add%20package%20screen.dart';
 
+import 'booking list screen.dart';
 import 'dashboard.dart';
 import 'locations.dart';
 
@@ -29,6 +30,7 @@ class _AdminHomePageState extends State<AdminHomePage> with SingleTickerProvider
     'Tour Packages',
     'Add Packages',
     'Locations',
+    'Bookings',
     'Users',
     'Settings',
     'Admin'
@@ -39,6 +41,7 @@ class _AdminHomePageState extends State<AdminHomePage> with SingleTickerProvider
     LineIcons.boxOpen,
     LineIcons.plus,
     LineIcons.mapMarker,
+    LineIcons.book,
     LineIcons.users,
     LineIcons.screwdriver,
     LineIcons.user,
@@ -250,6 +253,7 @@ class _AdminHomePageState extends State<AdminHomePage> with SingleTickerProvider
                   CoverWidget(widget: TourPackagesPage()),
                   CoverWidget(widget: AddPackageScreen()),
                   CoverWidget(widget: PlacesPage()),
+                  CoverWidget(widget: BookingListScreen()),
                   CoverWidget(widget: UserListScreen()),
                   CoverWidget(widget: AdminSettingsScreen()),
                   const Center(child: Text('Settings')),
