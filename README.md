@@ -26,6 +26,21 @@ The admin dashboard provides powerful tools for managing users, tours, and booki
 - **Content Management**: Update city information, emergency contacts, and other content.
 - **Reports and Analytics**: View reports on app usage, bookings, and user engagement.
 
+HOME
+![img.png](img.png)
+
+DESTINATIONS
+![img_1.png](img_1.png)
+
+TOUR PACKAGES
+![img_2.png](img_2.png)
+
+NEWS
+![img_3.png](img_3.png)
+
+CONTACT
+![img_4.png](img_4.png)
+
 ## APIs
 
 The app relies on a robust backend with the following key APIs:
