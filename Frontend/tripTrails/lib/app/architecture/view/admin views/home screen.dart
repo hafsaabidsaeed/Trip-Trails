@@ -8,7 +8,6 @@ import 'package:triptrails/app/architecture/view/admin%20views/users%20screen.da
 import 'package:triptrails/app/theme/app_colors.dart';
 import 'package:triptrails/app/widgets/cover widget.dart';
 import 'package:triptrails/app/architecture/view/admin%20views/add%20package%20screen.dart';
-
 import 'booking list screen.dart';
 import 'dashboard.dart';
 import 'locations.dart';

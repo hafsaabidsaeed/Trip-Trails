@@ -201,7 +201,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                 color: AppColors.lavender,
                 child: Row(
                   children: [
-                    const SizedBox(width: 27), // Space for alignment
+                    const SizedBox(width: 30), // Space for alignment
                     const Row(
                       children: [
                         Icon(
@@ -282,12 +282,11 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
               ),
               // Lower Row: Logo, Navigation, and Login/Signup Buttons
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 60),
                 height: 85,
                 color: Colors.white,
                 child: Row(
                   children: [
-                    const SizedBox(width: 30),
                     Image.asset(
                       'assets/logo6.png', // Replace with your logo image path
                       height: 100,
@@ -341,7 +340,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                             style: TextStyle(fontSize: 16, color: Colors.black),
                           ),
                         ),
-                        const SizedBox(width: 20),
+                        // const SizedBox(width: 20),
                         TextButton(
                           onPressed: () {
                             Beamer.of(context).beamToNamed('/contact');
@@ -419,7 +418,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 80.0, vertical: 20),
+                      horizontal: 60.0, vertical: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -462,7 +461,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                 size: 40,
                               ),
                               SizedBox(
-                                width: 8,
+                                width: 5,
                               ),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -499,7 +498,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                 size: 45,
                               ),
                               SizedBox(
-                                width: 8,
+                                width: 5,
                               ),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -609,7 +608,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
               // body
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
                 child: Row(
                   children: [
                     Container(
@@ -690,7 +689,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       ),
                     ),
 
-                    SizedBox(width: screenWidth*0.13,),
+                    SizedBox(width: screenWidth*0.1,),
 
                     // Booking Form Section
                     Container(
@@ -707,7 +706,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(10.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -715,7 +714,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                             const SizedBox(height: 15),
 
                             Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding: const EdgeInsets.all(0),
                               child: Form(
                                 key: _formKey,
                                 child: Column(
