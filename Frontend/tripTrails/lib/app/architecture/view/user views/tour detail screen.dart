@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,9 +21,10 @@ class TourDetailScreen extends StatefulWidget {
 
 class _TourDetailScreenState extends State<TourDetailScreen> {
   final ScrollController _scrollController = ScrollController();
-  final String baseUrl =
-      "http://192.168.18.60:5009"; // Base URL for local images
+  final String baseUrl = "http://192.168.18.60:5009"; // Base URL for local images
   // final String baseUrl = "http://192.168.100.70:5009"; // Base URL for local images
+
+  late TabController _tabController;
 
   // Create GlobalKeys for each section
   final GlobalKey _homeKey = GlobalKey();
@@ -47,8 +47,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   // Sample data for dropdowns
   final List<String> _tourTypes = ['Family', 'Couple', 'Solo'];
   final List<String> _tickets = ['Standard', 'luxury', 'Gold'];
-  final List<int> _peopleCount =
-      List.generate(10, (i) => i + 1); // For people count 1 to 10
+  final List<int> _peopleCount = List.generate(10, (i) => i + 1); // For people count 1 to 10
 
 
   void _submitForm() async {
@@ -635,56 +634,133 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                             'Included/Exclude',
                             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
                           ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: const [
-                              Icon(Icons.check, color: Colors.orange),
-                              SizedBox(width: 8),
-                              Text('Pick and Drop Services', style: TextStyle(fontSize: 16),),
-                            ],
+                          Container(
+                            width: screenWidth * 0.7,
+                            height: screenHeight * 0.4,
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // TabBar like design at the top
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(vertical: 8),
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: Colors.black87,
+                                              width: 2,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'Basic',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(vertical: 8),
+                                        child: Center(
+                                          child: Text(
+                                            'Standard',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black45,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(vertical: 8),
+                                        child: Center(
+                                          child: Text(
+                                            'Premium',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black45,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+                                // Basic Package title and Price
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'BASIC',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    Text(
+                                      'PKR 4,376',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10), // Spacing
+                                // Description of the service
+                                Text(
+                                  'vcyeiwvbc d uiewvbciads  uewbvcowquabc uoebvcouweqabc d \n vequcisb uoevqcb uvecoqbs uvbceq uobecq \n yeifvqc vyieqc ueibqc .',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                SizedBox(height: 10), // Spacing
+                                // Delivery time row
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time, size: 16, color: Colors.black45),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '3 ciqc qecbqx ',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 30), // Spacing before button
+
+                              ],
+                            ),
                           ),
-                          Row(
-                            children: const [
-                              Icon(Icons.check, color: Colors.orange),
-                              SizedBox(width: 8),
-                              Text('1 Meal Per Day', style: TextStyle(fontSize: 16),),
-                            ],
-                          ),
-                          Row(
-                            children: const [
-                              Icon(Icons.check, color: Colors.orange),
-                              SizedBox(width: 8),
-                              Text('Cruise Dinner & Music Event', style: TextStyle(fontSize: 16),),
-                            ],
-                          ),
-                          Row(
-                            children: const [
-                              Icon(Icons.check, color: Colors.orange),
-                              SizedBox(width: 8),
-                              Text('Visit 7 Best Places in the City', style: TextStyle(fontSize: 16),),
-                            ],
-                          ),
-                          Row(
-                            children: const [
-                              Icon(Icons.close, color: Colors.black45),
-                              SizedBox(width: 8),
-                              Text('Additional Services', style: TextStyle(fontSize: 16),),
-                            ],
-                          ),
-                          Row(
-                            children: const [
-                              Icon(Icons.close, color: Colors.black45),
-                              SizedBox(width: 8),
-                              Text('Insurance', style: TextStyle(fontSize: 16),),
-                            ],
-                          ),
-                          Row(
-                            children: const [
-                              Icon(Icons.close, color: Colors.black45),
-                              SizedBox(width: 5),
-                              Text('Food & Drinks', style: TextStyle(fontSize: 16),),
-                            ],
-                          ),
+
+
                         ],
                       ),
                     ),
@@ -719,6 +795,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                 key: _formKey,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     // Title
                                     Text(

@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
 import 'dart:html' as html;
-
 import 'package:triptrails/app/theme/app_colors.dart';
 
 class TourPackagesPage extends StatefulWidget {
@@ -468,13 +467,45 @@ class _TourPackagesPageState extends State<TourPackagesPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                Text('Description: ${package['description']}'),
-                                Text('Price: Rs ${package['price']}'),
-                                Text('Duration: ${package['duration']}'),
-                                Text('Location: ${package['location']}'),
-                                Text('Package Type: ${package['packageType']}'),
-                                Text('Start Date: ${package['startDate']}'),
-                                Text('End Date: ${package['endDate']}'),
+
+                                    Text('Description: ${package['description']} '),
+
+                                Row(
+                                  children: [
+                                    Text('Price: Rs ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    Text('${package['price']}'),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Duration: ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    Text('${package['duration']}'),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Location: ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    Text('${package['location']}'),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Package Type: ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    Text('${package['packageType']}'),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text('Start Date:', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    Text('${package['startDate']}'),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text('End Date: ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    Text('${package['endDate']}'),
+                                  ],
+                                ),
                                 const SizedBox(height: 8),
 
                                 // Buttons

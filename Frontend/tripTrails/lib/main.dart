@@ -1,4 +1,3 @@
-// main.dart
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:triptrails/app/architecture/view/user%20views/user%20home%20screen.dart';
@@ -8,12 +7,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 // Define the routes for the application
 class HomeLocation extends BeamLocation<BeamState> {
   @override
-
-
   List<String> get pathPatterns => [
-    '/login',
-    '/signup',
-    '/admin',
     '/home',
     '/destinations',
     '/packages',
@@ -21,7 +15,6 @@ class HomeLocation extends BeamLocation<BeamState> {
     '/contact',
   ];
 
-  
   @override
   List<BeamPage> buildPages(BuildContext context, BeamState state) {
     return [
@@ -33,7 +26,7 @@ class HomeLocation extends BeamLocation<BeamState> {
     ];
   }
 }
-
+  
 void main() {
   usePathUrlStrategy();
   runApp(const MyApp());
@@ -58,6 +51,7 @@ class MyApp extends StatelessWidget {
             HomeLocation(),
           ],
         ),
+        notFoundPage: BeamPage.notFound,
       ),
       routeInformationParser: BeamerParser(),
     );

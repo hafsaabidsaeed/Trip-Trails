@@ -15,6 +15,11 @@ const tourPackageSchema = new mongoose.Schema({
         enum: ['Family', 'Couple', 'Solo'],
         required: true
     },
+    ticketType: {
+        type: String,
+        enum: ['Standard', 'Luxury', 'Gold'],
+        required: true
+    },
     images: [{ type: String }],  // Array to store multiple image paths
     createdAt: { type: Date, default: Date.now },
     // Adding reference to city

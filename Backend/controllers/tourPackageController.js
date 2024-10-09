@@ -3,7 +3,7 @@ const TourPackage = require('../models/tourPackageModel.js');
 // Create a tour package and associate it with a city
 exports.createTourPackage = async (req, res) => {
     try {
-        const { title, description, price, duration, location, startDate, endDate, packageType
+        const { title, description, price, duration, location, startDate, endDate, packageType, ticketType,
             // , cityId
          } = req.body;
 
@@ -19,6 +19,7 @@ exports.createTourPackage = async (req, res) => {
             startDate,
             endDate,
             packageType,
+            ticketType,
             images: imagePaths,
             // city: cityId  // Reference to the city
         });
@@ -81,7 +82,7 @@ exports.getTourPackagesByCity = async (req, res) => {
 // Controller: Update a tour package
 exports.updateTourPackage = async (req, res) => {
     try {
-        const { title, description, price, duration, location, startDate, endDate, packageType } = req.body;
+        const { title, description, price, duration, location, startDate, endDate, packageType, ticketType } = req.body;
 
         // Find the package by ID
         let tourPackage = await TourPackage.findById(req.params.id);
@@ -104,6 +105,7 @@ exports.updateTourPackage = async (req, res) => {
         if (startDate) tourPackage.startDate = startDate;
         if (endDate) tourPackage.endDate = endDate;
         if (packageType) tourPackage.packageType = packageType;
+        if (ticketType) tourPackage.ticketType = ticketType;
         tourPackage.images = updatedImages;  // Preserve both old and new images
 
         // Save the updated package
